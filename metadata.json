@@ -1,0 +1,5 @@
+{
+  "name": "Unified Scene Architect - Layered Drag & Drop",
+  "description": "A self-contained module for building and playing complex layered drag-and-drop exercises. Includes AI-powered scene generation and perspective-aware positioning.",
+  "requestFramePermissions": []
+}
