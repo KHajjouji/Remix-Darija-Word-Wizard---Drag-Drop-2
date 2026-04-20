@@ -106,7 +106,7 @@ COORDINATES: Top-left is (0,0). Min zone size 10%. Objects must map EXPLICITLY t
     });
 
     const aiPromise = ai.models.generateContent({
-      model: 'gemini-3.1-pro-preview', // MUST use this model as it's the only one with valid API scopes in this environment
+      model: 'gemini-2.5-pro',
       contents: prompt,
       config: {
         responseMimeType: 'application/json',

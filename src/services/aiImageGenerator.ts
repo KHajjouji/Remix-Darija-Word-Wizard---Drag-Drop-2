@@ -6,7 +6,6 @@ const GLOBAL_STYLE_ENFORCER = ", minimalist flat 2D vector graphic art style, cl
 async function removeWhiteBackground(base64Url: string): Promise<string> {
   return new Promise((resolve, reject) => {
     const img = new Image();
-    img.crossOrigin = "Anonymous";
     img.onload = () => {
       const canvas = document.createElement("canvas");
       canvas.width = img.width;
@@ -89,21 +88,34 @@ export async function generateImage(prompt: string, isObject: boolean = false): 
     const objectRequirement = isObject ? " on a pure solid #FFFFFF white background. " : "";
     const finalPrompt = prompt.includes("vector") ? prompt : `${prompt}.${objectRequirement}${GLOBAL_STYLE_ENFORCER}`;
     
+    console.log(`Generating image for prompt: ${finalPrompt}`);
+    
+    // Use the official generateContent endpoint for flash-image model
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash-image', // Fast, native image model
-      contents: finalPrompt,
-      config: {}
+      model: 'gemini-2.5-flash-image',
+      contents: {
+        parts: [{ text: finalPrompt }]
+      }
     });
 
     for (const part of response.candidates?.[0]?.content?.parts || []) {
       if (part.inlineData) {
-        let rawBase64 = `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
+        const mimeType = part.inlineData.mimeType || 'image/jpeg';
         
+        let base64Data = part.inlineData.data;
+        if (typeof base64Data !== 'string') {
+           // Provide fallback or stringification if SDK changed data struct
+           base64Data = (base64Data as any).toString('base64');
+        }
+
+        let rawBase64 = `data:${mimeType};base64,${base64Data}`;
+        
+        console.log(`Received base64 image data string of length: ${rawBase64.length}`);
+
         // Process transparency if it's a draggable object
         if (isObject) {
            return await removeWhiteBackground(rawBase64);
         }
-        
         return rawBase64;
       }
     }
